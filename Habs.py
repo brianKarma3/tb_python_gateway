@@ -11,6 +11,7 @@ class Habs:
     automode = 1 
     tempSetPoint = 27.5
     manualFanSpeed = 30 
+    windyWallSpeed = 20
 
     
     def __init__(self, name):
@@ -111,6 +112,19 @@ class Habs:
         local_topic = '/'.join(topic_string)
         return local_topic
 
+    def _upload_windy_fan_speed(self, data, device):
+        # data['method'] == "getFanSpeedAtTemp":
+        
+        reply_msg = {'device': device, 'id': data['id'], 'data':  float(self.windyWallSpeed)}
+        return json.dumps(reply_msg) 
+        
+    def _set_manual_fan_speed(self, data, device):
+        # fanSpeedAtTemp = float(data['params'])
+        topic_string = 'Habs/Hab2/ExtractionFan/WindyWallSpeed'.split('/')
+        topic_string[1] = device
+
+        local_topic = '/'.join(topic_string)
+        return local_topic
 
 
     

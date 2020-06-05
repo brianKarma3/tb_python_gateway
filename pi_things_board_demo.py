@@ -35,10 +35,10 @@ def on_connect(client, userdata, rc, *extra_params):
     # Sending current GPIO status
     data_out = json.dumps(hab2_state)
     client.publish('v1/gateway/attributes', json.dumps(hab2_state), 1)
-    
+    client.publish('v1/gateway/connect', json.dumps({"device":"Hab1"}), 1)
     client.publish('v1/gateway/connect', json.dumps({"device":"Hab2"}), 1)
     client.publish('v1/gateway/connect', json.dumps({"device":"Hab3"}), 1)
-    
+    client.publish('v1/gateway/connect', json.dumps({"device":"Hab4"}), 1)
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
@@ -140,7 +140,22 @@ def on_message(client, userdata, msg):
         # temp = json.dumps(reply_msg) 
         tb_topic = hab_list[ _get_hab_index(device)]._upload_manual_fan_speed(data, device)
         print(tb_topic)
-        client.publish('v1/gateway/rpc', tb_topic)      
+        client.publish('v1/gateway/rpc', tb_topic)  
+
+    elif data['method'] == 'setWindyWallSpeed' : 
+        # Parse the message.
+        windyWallSpeed = float(data['params'])
+        x = hab_list[hab_index]._set_windy_wall_speed(data,device)
+
+        # Check if automode is 0. Only change the fan speed if the hab fan is in manual mode. 
+        if hab_list[hab_index].automode ==0:
+            client_local.publish(x, windyWallSpeed, retain= True)
+    elif data['method'] == "getWindyWallSpeed":
+        # reply_msg = {'device': device, 'id': data['id'], 'data':  float(hab2.fanSpeedAtTemp)}
+        # temp = json.dumps(reply_msg) 
+        tb_topic = hab_list[ _get_hab_index(device)]._upload_windy_wall_speed(data, device)
+        print(tb_topic)
+        client.publish('v1/gateway/rpc', tb_topic)    
     return
 
             
@@ -176,6 +191,8 @@ def on_message_local(client_local, userdata, msg):
             hab_list[hab_index].automode = int(msg.payload)
         elif topic_list[3] == 'Speed':
             hab_list[hab_index].manualFanSpeed = int(msg.payload)
+        elif topic_list[3] == 'WindyWallSpeed':
+            hab_list[hab_index].windyWallSpeed = int(msg.payload)
             
            
 
