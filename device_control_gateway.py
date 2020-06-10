@@ -149,7 +149,7 @@ def on_message(client, userdata, msg):
 
         # Check if automode is 0. Only change the fan speed if the hab fan is in manual mode. 
         if hab_list[hab_index].automode ==0:
-            client_local.publish(x, windyWallSpeed, retain= True)
+            client_local.publish(x, windyWallSpeed, retain= False)
     elif data['method'] == "getWindyWallSpeed":
         # reply_msg = {'device': device, 'id': data['id'], 'data':  float(hab2.fanSpeedAtTemp)}
         # temp = json.dumps(reply_msg) 
@@ -190,9 +190,9 @@ def on_message_local(client_local, userdata, msg):
         elif topic_list[3] == 'AutomaticMode':
             hab_list[hab_index].automode = int(msg.payload)
         elif topic_list[3] == 'Speed':
-            hab_list[hab_index].manualFanSpeed = int(msg.payload)
+            hab_list[hab_index].manualFanSpeed = msg.payload
         elif topic_list[3] == 'WindyWallSpeed':
-            hab_list[hab_index].windyWallSpeed = int(msg.payload)
+            hab_list[hab_index].windyWallSpeed = msg.payload
             
            
 
@@ -226,7 +226,7 @@ client_local.on_connect = on_connect_local
 client_local.on_message = on_message_local
 client_local.username_pw_set(LOCAL_USER, LOCAL_PW)
 
-client_local.connect(LOCAL_HOST, 1883, 60); 
+client_local.connect(LOCAL_HOST, 1883, 60)
 
 client.loop_start()
 client_local.loop_start()
